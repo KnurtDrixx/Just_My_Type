@@ -1,6 +1,6 @@
 $("#keyboard-upper-container").hide();
 
-let mySentenceArray = ["this bean", " that is", "bee is good"];
+let mySentenceArray = ["this bean is the best bean ever", "that is", "bee is good"];
 let myTotalWords = mySentenceArray.join(" ").split(" ").length;
 
 const gameState = {
@@ -9,6 +9,7 @@ const gameState = {
   gameStart: false, //has the game stated yet used to check words per minute
   gameOverMan: false, //has the game ended, used to calculate words per minute and resetting gamestate
   currentInput: null,
+  incorrectKeyPress: 0,
   numberOfSentences: mySentenceArray.length,
   //sentenceLength: mySentenceArray[currentGameState.currentSentenceIndex].length-1
 }; // set up basic gamestate from video and then add sentences to be read out
@@ -16,12 +17,16 @@ const gameState = {
 let currentGameState = { ...gameState };
 //console.log(currentGameState)
 
-$(`<h1 id="beans">${mySentenceArray[currentGameState.currentSentenceIndex]} </h1>`).appendTo("#sentence");
+//$(`<h1 id="beans">${mySentenceArray[currentGameState.currentSentenceIndex]} </h1>`).appendTo("#sentence");
+$("#beans").text(`${mySentenceArray[currentGameState.currentSentenceIndex]}`);
 
 let sentenceLength = mySentenceArray[currentGameState.currentSentenceIndex].length;
 //console.log(sentenceLength)
 let currentSentence = mySentenceArray[currentGameState.currentSentenceIndex]; //the whole sentence index
 let currentLetterToMatch = currentSentence[currentGameState.currentLetterIndex]; //character of the sentence in the index
+let target = $("#target-letter");
+let s;
+$(target).text(currentLetterToMatch);
 
 console.log(currentSentence);
 console.log(currentLetterToMatch);
@@ -71,6 +76,13 @@ $(document).keypress(function (e) {
 
   if (currentKey === currentLetterToMatch) {
     //this happens when the keypress matches the right letter
+    if (currentGameState.gameStart === false) {
+      s = Date.now();
+      currentGameState.gameStart = true;
+    }
+
+    $("#yellow-block").css("width", "+=17.5");
+    //! set up yellow block to move across currentLetterToMatch and then reset when nextSentence fires
 
     //console.log(currentSentence)
     //console.log(`the ${currentKey} key was pressed`)
@@ -102,10 +114,13 @@ $(document).keypress(function (e) {
       //when you press the correct key but are not at the end of the sentence
     }
     currentLetterToMatch = currentSentence[currentGameState.currentLetterIndex];
-    if (currentLetterToMatch === " ") {
-      console.log(`you must press Space`);
-    } else {
-      console.log(`you need to press ${currentLetterToMatch}`);
+
+    if (currentLetterToMatch === " " && currentGameState.gameOverMan === false) {
+      //console.log(`you must press Space`);
+      $(target).text("SPACE");
+    } else if (currentGameState.gameOverMan === false) {
+      $(target).text(currentLetterToMatch);
+      //console.log(`you need to press ${currentLetterToMatch}`);
     }
     //console.log(`you need to press ${currentLetterToMatch}`);
   } else {
@@ -141,18 +156,42 @@ function moveToNextSentence() {
 
   sentenceLength = currentSentence.length;
 
+  $("#yellow-block").css({
+    position: "absolute",
+    left: "22.8",
+    "margin-top": "6px",
+    width: "15px",
+    height: "20px",
+    "background-color": "yellow",
+    "z-index": "-20",
+  });
+
   console.log(sentenceLength);
 }
 
 function youFuckedUp() {
-  $("#feedback").text("You beansd it");
+  currentGameState.incorrectKeyPress++;
+  $("#feedback").text(`You beansd it ${currentGameState.incorrectKeyPress} times`);
+  //creates negative feedback
 
+  setTimeout(function () {
+    $("#feedback").html(`&nbsp;`);
+  }, 3000);
+  //removes the negative feedback after 3 seconds
   //! add funny feedback message later, when andrew cant see
   console.log(`wrong key was pressed, you need to press ${currentLetterToMatch}`);
 }
 
 function endOfGame() {
   currentGameState.gameOverMan = true;
+  $(target).text("Game Over, You Survived");
+  //set words per minute
+  let endTime = Date.now();
+  let elapsedTime = (endTime - s) / 1000 / 60;
+  let wordsPerMinute = myTotalWords / elapsedTime - 1 * currentGameState.incorrectKeyPress;
+  //! set punishement number to higher when andrew cant see
+  Swal.fire(`Your Score is ${wordsPerMinute.toFixed(2)} Words per Minute`);
+
   console.log("the game is over");
 }
 
@@ -166,5 +205,5 @@ function randomColor() {
 }
 
 // if char code === id of keyboard keys, change color to green
-//! how to translate key press into ascii and then translate ascii back to key strong to be displayed
-//! where to display key on page
+// how to translate key press into ascii and then translate ascii back to key strong to be displayed
+// where to display key on page
