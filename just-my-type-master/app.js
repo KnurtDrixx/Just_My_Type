@@ -1,8 +1,34 @@
 $("#keyboard-upper-container").hide();
 
-let mySentenceArray = ["this bean is the best bean ever", "that is", "bee is good"];
+let mySentenceArray = [
+  `What the flip did you just flapping say about me, Ervin Howell?`,
+  `I'll have you know I graduated top of my class at Master Tang's Dojo,`,
+  `and I've been involved in numerous secret raids on Evil Betty's forces, and I have over 300 confirmed victories.`,
+  `I am trained in Face-to_Foot style and I'm the top man in the entire whatever country we live in. `,
+  `You are nothing to me but just another target.`,
+  `I will wipe you the flap out with precision the likes of which has never been seen before on this Eaerth, mark my flipping words.`,
+  `You think you can get away with saying that shite to me over the Interwebs?`,
+  `Think again, Ervin Howell.`,
+  `As we speak I am contacting my secret network of spies across Boosegumps`,
+  `and your IPPPPPP is being traced right now so you better prepare for the storm, my little guy.`,
+  `The storm that wipes out the pathetic ickle itty bitty thing you call your life.`,
+  `You're flopping un-alive, kiddo.`,
+  `I can be anyWhomst'd've'ly'yaint'nt'ed'ies's'y'es, anything, anywhen, anywhere, anywhy, anyhow`,
+  `and I can kill you in over seven hundred ways, and that's just with my bear hands.`,
+  `Not only am I extensively trained in Face_to-Foot and My-Nuts-to_your-Fist, Clap-these-Cheeks style,`,
+  `but I have access to the entire arsenal of Pork_and_Beans`,
+  `and I will use it to its full extent to wipe your miserable booty off the face of the continent, you little insect.`,
+  `If only you could have known what unholy retribution your little "clever" comment was about to bring down upon you,`,
+  `maybe you would have held your flogging tongue.`,
+  `But you couldn't, you didn't, and now you're paying the price,`,
+  `you gotdamn idiot.`,
+  `I will poopoo fury all over you and you will drown in it.`,
+  `You're flanking unpersoned, kiddo.`,
+];
+//these are my amazing sentences
 let myTotalWords = mySentenceArray.join(" ").split(" ").length;
-
+// set mySentenceArray to clipart font
+// write out wimp lo copy pasta
 const gameState = {
   currentSentenceIndex: 0, //which sentence you are on
   currentLetterIndex: 0, //which letter of that sentence you are on
@@ -76,13 +102,18 @@ $(document).keypress(function (e) {
 
   if (currentKey === currentLetterToMatch) {
     //this happens when the keypress matches the right letter
+
+    let audio1 = new Audio(`Good_Noice.mp4`);
+    audio1.play();
+
+    // fire good sound effect here
     if (currentGameState.gameStart === false) {
       s = Date.now();
       currentGameState.gameStart = true;
     }
 
     $("#yellow-block").css("width", "+=17.5");
-    //! set up yellow block to move across currentLetterToMatch and then reset when nextSentence fires
+    // set up yellow block to move across currentLetterToMatch and then reset when nextSentence fires
 
     //console.log(currentSentence)
     //console.log(`the ${currentKey} key was pressed`)
@@ -156,6 +187,11 @@ function moveToNextSentence() {
 
   sentenceLength = currentSentence.length;
 
+  //! fire next sentence sound effect
+
+  let audio3 = new Audio(`Mid_Noice.mp4`);
+  audio3.play();
+
   $("#yellow-block").css({
     position: "absolute",
     left: "22.8",
@@ -171,15 +207,18 @@ function moveToNextSentence() {
 
 function youFuckedUp() {
   currentGameState.incorrectKeyPress++;
-  $("#feedback").text(`You beansd it ${currentGameState.incorrectKeyPress} times`);
+  $("#feedback").text(`Mavis Beacon will remember you beans'd it ${currentGameState.incorrectKeyPress} times`);
   //creates negative feedback
+  let audio2 = new Audio(`Bad_Noice.mp3`);
+  audio2.play();
+  // fire bad sound effect
 
   setTimeout(function () {
     $("#feedback").html(`&nbsp;`);
   }, 3000);
   //removes the negative feedback after 3 seconds
-  //! add funny feedback message later, when andrew cant see
-  console.log(`wrong key was pressed, you need to press ${currentLetterToMatch}`);
+  // add funny feedback message later, when andrew cant see
+  //console.log(`wrong key was pressed, you need to press ${currentLetterToMatch}`);
 }
 
 function endOfGame() {
@@ -188,11 +227,51 @@ function endOfGame() {
   //set words per minute
   let endTime = Date.now();
   let elapsedTime = (endTime - s) / 1000 / 60;
-  let wordsPerMinute = myTotalWords / elapsedTime - 1 * currentGameState.incorrectKeyPress;
-  //! set punishement number to higher when andrew cant see
-  Swal.fire(`Your Score is ${wordsPerMinute.toFixed(2)} Words per Minute`);
+  let wordsPerMinute = myTotalWords / elapsedTime - 4 * currentGameState.incorrectKeyPress;
+  // set punishement number to higher when andrew cant see
+  //Swal.fire(`Your Score is ${wordsPerMinute.toFixed(2)} Words per Minute`);
 
+  Swal.fire({
+    title: "Would you like to Play Again??",
+    text: `Your Score is ${wordsPerMinute.toFixed(2)} Words per Minute, You made ${currentGameState.incorrectKeyPress} mistakes.`,
+    showDenyButton: true,
+
+    confirmButtonText: "Yes",
+    denyButtonText: `Heck No`,
+  }).then((result) => {
+    /* Read more about isConfirmed, isDenied below */
+    if (result.isConfirmed) {
+      resetGame();
+      console.log(currentGameState);
+      // put resetGame function here
+      // set game back to base state to be played again
+    } else if (result.isDenied) {
+      // redirect to mavis beacon teaches typing
+      window.location.assign("https://www.broderbund.com/education");
+    }
+  });
   console.log("the game is over");
+}
+
+function resetGame() {
+  currentGameState = { ...gameState };
+  $("#beans").text(`${mySentenceArray[currentGameState.currentSentenceIndex]}`);
+  sentenceLength = mySentenceArray[currentGameState.currentSentenceIndex].length;
+  currentSentence = mySentenceArray[currentGameState.currentSentenceIndex]; //the whole sentence index
+  currentLetterToMatch = currentSentence[currentGameState.currentLetterIndex]; //character of the sentence in the index
+  target = $("#target-letter");
+  s = undefined;
+  $(target).text(currentLetterToMatch);
+
+  $("#yellow-block").css({
+    position: "absolute",
+    left: "22.8",
+    "margin-top": "6px",
+    width: "15px",
+    height: "20px",
+    "background-color": "yellow",
+    "z-index": "-20",
+  });
 }
 
 function randomColor() {
